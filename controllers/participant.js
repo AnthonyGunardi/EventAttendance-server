@@ -21,21 +21,6 @@ class ParticipantController {
     }
   };
 
-  static async getParticipantsNotOnBus(req, res, next) {
-    const bus_number = req.params.bus_number;
-    try {
-      const participants = await Participant.findAll({
-        where: { bus_number, get_on_bus: false },
-        order: [['fullname', 'asc']]
-      });
-      const data = { total_participant: participants.length, participants };
-      sendData(200, data, "Success get all participants", res)
-    }
-    catch (err) {
-      next(err);
-    }
-  };
-
   static async getParticipant(req, res, next) {
     const id = req.params.id
     try {
@@ -54,14 +39,28 @@ class ParticipantController {
     }
   }
 
-  static async checkinBus(req, res, next) {
-    const id = req.params.id;
+  static async checkinEvent(req, res, next) {
+    const code = req.params.code;
+    const event_id = req.body.event_id;
     try {
-      const updated = await Participant.update({ get_on_bus: true }, {
-        where: { id },
-        returning: true
+      //check if participant is exist
+      const participant = await Participant.findOne({
+        where: { code },
+        include: {
+          model: Event,
+          required: false, // LEFT JOIN
+        }
       })
-      sendResponse(200, "Success update bus status", res)
+      if (!participant) return sendResponse(404, "Participant not found", res)
+
+      //get event
+      const event = await Event.findOne({
+        where: { id: event_id }
+      })
+
+      await participant.addEvent(event, { through: 'Event_Participant' });
+
+      sendData(201, participant, `Success checkin to ${event.title}`, res)
     }
     catch (err) {
       next(err)

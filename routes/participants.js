@@ -5,5 +5,6 @@ const adminAuthorization = require('../middlewares/adminAuthorization');
 
 route.get('/', ParticipantController.findAllParticipants);
 route.get('/:id', ParticipantController.getParticipant);
+route.post('/:code', ParticipantController.checkinEvent);
 
 module.exports = route;
