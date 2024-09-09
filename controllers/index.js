@@ -1,7 +1,7 @@
 const ParticipantController = require('./participant');
-const AttendanceController = require('./attendance');
+const EventController = require('./event');
 
 module.exports = { 
   ParticipantController,
-  AttendanceController
+  EventController
 };

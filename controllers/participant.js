@@ -1,20 +1,15 @@
-const { Participant, Attendance } = require('../models');
+const { Participant, Event } = require('../models');
 const { Op } = require('sequelize');
 const AccessToken = require('../helpers/accessToken');
 const { sendResponse, sendData } = require('../helpers/response');
 
 class ParticipantController {
   static async findAllParticipants(req, res, next) {
-    const event_name = req.body.event_name;
     try {
-      // const participants = await Participant.findAll({
-      //   order: [['fullname', 'asc']]
-      // });
       const participants = await Participant.findAll({
         include: {
-          model: Attendance,
+          model: Event,
           required: false, // LEFT JOIN
-          where: { event_name }
         },
         order: [['fullname', 'asc']]
       });
@@ -45,7 +40,11 @@ class ParticipantController {
     const id = req.params.id
     try {
       const participant = await Participant.findOne({
-        where: { id }
+        where: { id },
+        include: {
+          model: Event,
+          required: false, // LEFT JOIN
+        }
       })
       if (!participant) return sendResponse(404, "Participant not found", res)
       sendData(200, participant, "Success Get Detail Participant", res)

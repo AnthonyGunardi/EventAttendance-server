@@ -11,10 +11,22 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Participant.hasMany(models.Attendance, {foreignKey: 'participant_id', sourceKey: 'id'})
+      Participant.belongsToMany(models.Event, {through: 'Event_Participant'})
     }
   }
   Participant.init({
+    code: {
+      type: DataTypes.STRING,
+      allowNull:false,
+      validate: {
+        notEmpty: {
+          msg: 'Code is Required'
+        },
+        notNull: {
+          msg: 'Code is Required'
+        }
+      }
+    },
     fullname: {
       type: DataTypes.STRING,
       allowNull:false,
@@ -27,8 +39,7 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    bus_number: DataTypes.STRING,
-    get_on_bus: DataTypes.BOOLEAN
+    bus: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Participant'
