@@ -97,6 +97,21 @@ class ParticipantController {
       })
       if (!participant) return sendResponse(404, "Participant is not found", res)
 
+      //check if updated code is already used
+      const participantWithSameCode = await Participant.findOne({
+        where: { 
+          [Op.and]: [
+            { 
+              id: {
+                [Op.ne]: participant.id, 
+              } 
+            },
+            { code }
+          ]
+        }
+      })
+      if (participantWithSameCode) return sendResponse(403, "Code already used", res)
+
       const updated = await Participant.update({ code, fullname, bus }, {
         where: { id },
         returning: true
