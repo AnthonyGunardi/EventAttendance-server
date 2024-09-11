@@ -44,12 +44,12 @@ class ParticipantController {
   static async getParticipantsByEvent(req, res, next) {
     const event_id = req.params.event_id;
     try {
+      //check if event is exist
       const event = await Event.findOne({
-        where: {
-            id: event_id
-        }
-    })
-      if (!event) return sendResponse(404, "Participants not found", res);
+        where: { id: event_id }
+      })
+      if (!event) return sendResponse(200, "Event is not found", res);
+
       const participants = await Participant.findAll({
         include: {
           model: Event,
