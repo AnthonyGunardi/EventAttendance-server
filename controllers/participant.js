@@ -113,8 +113,11 @@ class ParticipantController {
         where: { id: event_id }
       })
 
+      //check if participant already checkin
+      const alreadyCheckedIn = await participant.hasEvent(event);
+      if (alreadyCheckedIn) return sendResponse(409, "Already checked in", res)
+      
       await participant.addEvent(event, { through: 'Event_Participant' });
-
       sendData(201, participant, `Success checkin to ${event.title}`, res)
     }
     catch (err) {
