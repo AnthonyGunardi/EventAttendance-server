@@ -4,6 +4,26 @@ const AccessToken = require('../helpers/accessToken');
 const { sendResponse, sendData } = require('../helpers/response');
 
 class ParticipantController {
+  static async create(req, res, next) {
+    try {
+      const { code, fullname, bus } = req.body;
+
+      //check if participant already exist
+      const existingParticipant = await Participant.findOne({ 
+        where: { code } 
+      });
+      if (Boolean(existingParticipant)) return sendResponse(400, 'Participant already exist', res);
+
+      const participant = await Participant.create(
+        { code, fullname, bus }
+      );
+      sendData(201, { code: participant.code, fullname: participant.fullname, bus: participant.bus }, "Success create participant", res);
+    }
+    catch (err) {
+      next(err)
+    };
+  };
+
   static async findAllParticipants(req, res, next) {
     try {
       const participants = await Participant.findAll({
@@ -67,16 +87,21 @@ class ParticipantController {
     }
   };
 
-  static async resetAllBusStatus(req, res, next) {
-    let resetData = {
-      get_on_bus: false
-    };
+  static async update(req, res, next) {
+    const id = req.params.id;
+    const { code, fullname, bus } = req.body;
     try {
-      const updated = await Participant.update(resetData, {
-        where: { get_on_bus: true },
+      //check if participant is exist
+      const participant = await Participant.findOne({
+        where: { id }
+      })
+      if (!participant) return sendResponse(404, "Participant is not found", res)
+
+      const updated = await Participant.update({ code, fullname, bus }, {
+        where: { id },
         returning: true
       })
-      sendResponse(200, "Success update bus status for all participants", res)
+      sendResponse(200, "Success update participant", res)
     }
     catch (err) {
       next(err)
