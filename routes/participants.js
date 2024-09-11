@@ -7,6 +7,5 @@ route.post('/', ParticipantController.create);
 route.get('/', ParticipantController.findAllParticipants);
 route.get('/:id', ParticipantController.getParticipant);
 route.put('/:id', ParticipantController.update);
-route.post('/:code', ParticipantController.checkinEvent);
 
 module.exports = route;

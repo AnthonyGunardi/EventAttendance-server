@@ -41,6 +41,41 @@ class ParticipantController {
     }
   };
 
+  static async getParticipantsByEvent(req, res, next) {
+    const event_id = req.params.event_id;
+    try {
+      const participants = await Participant.findAll({
+        include: [{
+          model: Event,
+          where: { id: event_id },
+          required: false,
+          through: {
+            attributes: []
+          }
+        }]
+      });
+    
+      const participantsWithAttendance = participants.map(participant => {
+        return {
+          id: participant.id,
+          fullname: participant.fullname,
+          code: participant.code,
+          bus: participant.bus,
+          attendance: participant.Events.length > 0
+        };
+      });
+      const leaderboardData = {
+        total_participant: participantsWithAttendance.length,
+        attend: participantsWithAttendance.filter(participant => participant.attendance === true).length,
+        not_attend: participantsWithAttendance.filter(participant => participant.attendance === false).length
+      }
+      sendData(200, { leaderboard: leaderboardData, attendances: participantsWithAttendance }, "Success get all participants", res)   
+    }     
+    catch (err) {
+      next(err);
+    }
+  };
+
   static async getParticipant(req, res, next) {
     const id = req.params.id
     try {
@@ -60,8 +95,8 @@ class ParticipantController {
   }
 
   static async checkinEvent(req, res, next) {
-    const code = req.params.code;
-    const event_id = req.body.event_id;
+    const code = req.body.code;
+    const event_id = req.params.event_id;
     try {
       //check if participant is exist
       const participant = await Participant.findOne({
