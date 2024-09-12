@@ -191,7 +191,7 @@ class ParticipantController {
       //import data from csv
       const data = await importDataFromCsv(`./public/${url}`);
       const parsed = JSON.parse(data)
-      if (!parsed[0].fullname) return sendResponse(502, "Error reading file", res)
+      if (parsed.length <= 1) return sendResponse(502, "Error reading file", res)
       console.log(JSON.parse(data))
       await Participant.bulkCreate(JSON.parse(data));
       sendResponse(201, "Success upload participants", res)
