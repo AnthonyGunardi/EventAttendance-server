@@ -2,6 +2,8 @@ const { Participant, Event } = require('../models');
 const { Op } = require('sequelize');
 const AccessToken = require('../helpers/accessToken');
 const { sendResponse, sendData } = require('../helpers/response');
+const path = require('node:path');
+const { importDataFromCsv } = require('../helpers/importCsv');
 
 class ParticipantController {
   static async create(req, res, next) {
@@ -166,6 +168,35 @@ class ParticipantController {
       next(err)
     }
   };
+
+  static async uploadParticipants(req, res, next) {
+    try {
+      //upload file if req.files isn't null
+      let url = null;
+      if (req.files !== null) {
+        const file = req.files.fileCsv;
+        const ext = path.extname(file.name);
+        const fileName = file.md5 + ext;
+        const allowedType = ['.csv'];
+        url = `participants/${fileName}`;
+
+        //validate file type
+        if(!allowedType.includes(ext.toLocaleLowerCase())) return sendResponse(422, "File must have extension csv", res)    
+        //place the file on server
+        file.mv(`./public/participants/${fileName}`, async (err) => {
+          if(err) return sendResponse(502, err.message, res)
+        })
+      }
+
+      //import data from csv
+      const data = await importDataFromCsv(`./public/${url}`);
+      await Participant.bulkCreate(JSON.parse(data));
+      sendResponse(201, "Success upload participants", res)
+    }
+    catch (err) {
+      next(err)
+    }
+  }
 };
 
 module.exports = ParticipantController;
