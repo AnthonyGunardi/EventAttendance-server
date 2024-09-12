@@ -186,13 +186,15 @@ class ParticipantController {
         file.mv(`./public/participants/${fileName}`, async (err) => {
           if(err) return sendResponse(502, err.message, res)
         })
-      }
+      
 
       //import data from csv
       const data = await importDataFromCsv(`./public/${url}`);
       if (!data) return sendResponse(502, "Error reading file", res)
+      console.log(JSON.parse(data))
       await Participant.bulkCreate(JSON.parse(data));
       sendResponse(201, "Success upload participants", res)
+    }
     }
     catch (err) {
       next(err)
