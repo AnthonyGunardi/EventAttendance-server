@@ -37,9 +37,27 @@ class EventController {
     }
   };
 
+  static async getActiveEvents(req, res, next) {
+    try {
+      const events = await Event.findAll({
+        where: { isActive: true },
+        include: { 
+          model: Participant,
+          attributes: {
+            exclude: ['createdAt', 'updatedAt']
+          }
+        }
+      });
+      sendData(200, events, "Success get active events", res)
+    }
+    catch (err) {
+      next(err);
+    }
+  };
+
   static async update(req, res, next) {
     const id = req.params.id
-    const { title, description } = req.body;
+    const { title, description, isActive } = req.body;
     try {
       //check if event is exist
       const event = await Event.findOne({
@@ -54,7 +72,7 @@ class EventController {
       if (eventWithSameData) return sendResponse(403, "Event already exist", res)
 
       const updatedEvent = await Event.update(
-        { title, description }, 
+        { title, description, isActive }, 
         { where: { id: event.id }, returning: true }
       )
       sendResponse(200, "Success update event", res)

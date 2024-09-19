@@ -27,7 +27,11 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    description: DataTypes.STRING
+    description: DataTypes.STRING,
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    }
   }, {
     sequelize,
     modelName: 'Event',
